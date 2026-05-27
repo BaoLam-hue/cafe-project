@@ -7,11 +7,13 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+// Kết nối database
 const db = mysql.createConnection({
   host: process.env.DB_HOST,
   user: process.env.DB_USER,
   password: process.env.DB_PASSWORD,
   database: process.env.DB_NAME,
+  port: process.env.DB_PORT,
 });
 
 db.connect((err) => {
@@ -22,17 +24,11 @@ db.connect((err) => {
   console.log("Kết nối database thành công!");
 });
 
-app.get("/api/menu", (req, res) => {
-  db.query(
-    "SELECT * FROM menu_items WHERE is_available = 1",
-    (err, results) => {
-      if (err) return res.status(500).json({ error: err.message });
-      res.json(results);
-    },
-  );
-});
+// Routes
+app.use("/api/menu", require("./routes/menu")(db));
+app.use("/api/orders", require("./routes/orders")(db));
+app.use("/api/table", require("./routes/tables")(db));
+app.use("/api/categories", require("./routes/categories")(db));
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`Server chạy tại http://localhost:${PORT}`);
-});
+app.listen(PORT, () => console.log(`Server chạy tại http://localhost:${PORT}`));
