@@ -18,7 +18,7 @@ jobs:
           MYSQL_ALLOW_EMPTY_PASSWORD: yes
           MYSQL_DATABASE: cafe_db
         ports:
-          - 3307:3307
+          - 3306:3306
         options: >-
           --health-cmd="mysqladmin ping"
           --health-interval=10s
@@ -33,6 +33,45 @@ jobs:
         with:
           node-version: 20
 
+      - name: Tạo bảng database
+        run: |
+          mysql -h 127.0.0.1 -u root cafe_db <<EOF
+          CREATE TABLE IF NOT EXISTS menu_items (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            name VARCHAR(100) NOT NULL,
+            category VARCHAR(50),
+            price DECIMAL(10,2) NOT NULL,
+            image_url VARCHAR(255),
+            is_available BOOLEAN DEFAULT TRUE
+          );
+          CREATE TABLE IF NOT EXISTS tables (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            table_number VARCHAR(10) NOT NULL,
+            token VARCHAR(64) NOT NULL UNIQUE
+          );
+          CREATE TABLE IF NOT EXISTS orders (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            table_number VARCHAR(10),
+            status ENUM('pending','preparing','done') DEFAULT 'pending',
+            total DECIMAL(10,2),
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+          );
+          CREATE TABLE IF NOT EXISTS order_items (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            order_id INT,
+            menu_item_id INT,
+            quantity INT DEFAULT 1,
+            note VARCHAR(255)
+          );
+          CREATE TABLE IF NOT EXISTS categories (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            name VARCHAR(50) NOT NULL,
+            label VARCHAR(50) NOT NULL
+          );
+          INSERT INTO menu_items (name, category, price) VALUES ('Cà phê sữa đá', 'cafe', 35000);
+          INSERT INTO tables (table_number, token) VALUES ('1', 'test-token-123');
+          EOF
+
       - name: Install dependencies
         working-directory: backend
         run: npm install
@@ -40,9 +79,9 @@ jobs:
       - name: Run tests
         working-directory: backend
         env:
-          DB_HOST: localhost
+          DB_HOST: 127.0.0.1
           DB_USER: root
           DB_PASSWORD: ""
           DB_NAME: cafe_db
-          DB_PORT: 3307
+          DB_PORT: 3306
         run: npm test
