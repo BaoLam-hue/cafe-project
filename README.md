@@ -34,8 +34,8 @@ npm install
 ## 💻 Usage
 
 ```bash
-> backend: npx nodemon server.js
-> frontend: npm run dev
+> cd backend: npx nodemon server.js
+> cd frontend: npm run dev
 ```
 
 ## ✨ Features
