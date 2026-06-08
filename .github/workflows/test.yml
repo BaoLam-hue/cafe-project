@@ -2,9 +2,9 @@ name: Run Tests
 
 on:
   push:
-    branches: [main]
+    branches: [main, dev]
   pull_request:
-    branches: [main]
+    branches: [main, dev]
 
 jobs:
   test:
@@ -41,6 +41,10 @@ jobs:
       - name: Install dependencies
         working-directory: backend
         run: npm install
+
+      - name: Lint
+        working-directory: backend
+        run: npm run lint --if-present
 
       - name: Run tests
         working-directory: backend
